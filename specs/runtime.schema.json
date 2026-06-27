@@ -1,66 +1,71 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://jarvis-runtime.dev/specs/runtime.schema.json",
-  "title": "Runtime Protocol",
-  "description": "Runtime 核心协议。定义 Task Queue、Scheduler、Logger 等基础设施。",
+  "title": "Runtime Protocol v2",
+  "description": "Runtime 核心配置。Runtime 只知 Task，不知业务（不知 Comic/西游记/图片/视频）。",
   "type": "object",
   "required": ["version"],
   "properties": {
-    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
-    "task_queue": {
+    "version": { "type": "string" },
+    "event_bus": {
       "type": "object",
-      "description": "任务队列配置",
+      "description": "事件总线配置",
       "properties": {
-        "max_concurrent": { "type": "integer", "default": 4 },
-        "max_queue_size": { "type": "integer", "default": 100 },
-        "strategy": { "type": "string", "enum": ["fifo", "priority", "dependency"], "default": "priority" }
+        "backend": { "type": "string", "enum": ["memory", "redis", "mqtt"], "default": "memory" },
+        "events": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "系统预定义事件",
+          "default": [
+            "task.created",
+            "task.queued",
+            "task.started",
+            "task.completed",
+            "task.failed",
+            "task.cancelled",
+            "task.review_requested",
+            "task.review_approved",
+            "task.review_rejected",
+            "worker.registered",
+            "worker.unregistered",
+            "system.heartbeat",
+            "system.error"
+          ]
+        }
+      }
+    },
+    "queue": {
+      "type": "object",
+      "properties": {
+        "max_size": { "type": "integer", "default": 1000 },
+        "persist": { "type": "boolean", "default": true },
+        "storage_path": { "type": "string", "default": "runtime/queue.db" }
       }
     },
     "scheduler": {
       "type": "object",
       "properties": {
-        "poll_interval_ms": { "type": "integer", "default": 500 },
-        "heartbeat_timeout_ms": { "type": "integer", "default": 30000 }
+        "strategy": { "type": "string", "enum": ["priority", "fifo", "dag"], "default": "dag" },
+        "max_concurrent": { "type": "integer", "default": 4 },
+        "poll_interval_ms": { "type": "integer", "default": 500 }
       }
     },
-    "logger": {
+    "registry": {
       "type": "object",
       "properties": {
-        "level": { "type": "string", "enum": ["debug", "info", "warn", "error"], "default": "info" },
-        "output": { "type": "string", "enum": ["stdout", "file", "both"], "default": "both" },
-        "log_dir": { "type": "string", "default": "logs/" }
+        "auto_discover": { "type": "boolean", "default": true },
+        "discover_paths": { "type": "array", "items": { "type": "string" }, "default": ["workers/"] }
       }
     },
-    "workers": {
+    "adapters": {
       "type": "object",
-      "description": "已注册的 Worker 清单",
-      "patternProperties": {
-        "^[A-Z][a-zA-Z]+Worker$": {
-          "type": "object",
-          "properties": {
-            "enabled": { "type": "boolean" },
-            "path": { "type": "string" },
-            "model": { "type": "string" }
-          }
-        }
-      }
-    },
-    "mcp": {
-      "type": "object",
-      "description": "MCP 工具端点配置",
+      "description": "Tool 后端适配器配置。不绑定 MCP。",
       "properties": {
-        "filesystem": { "type": "object", "properties": { "roots": { "type": "array", "items": { "type": "string" } } } },
-        "shell": { "type": "object", "properties": { "enabled": { "type": "boolean" } } },
-        "git": { "type": "object", "properties": { "enabled": { "type": "boolean" } } }
-      }
-    },
-    "apis": {
-      "type": "object",
-      "description": "外部 API 配置引用（不存密钥，仅存端点）",
-      "properties": {
-        "deepseek": { "type": "string", "default": "https://api.deepseek.com/v1" },
-        "openai": { "type": "string", "default": "https://api.openai.com/v1" },
-        "comfyui": { "type": "string", "default": "http://127.0.0.1:8188" }
+        "default": { "type": "string", "default": "local" },
+        "mcp": { "type": "object", "properties": { "enabled": { "type": "boolean" } } },
+        "local": { "type": "object", "properties": { "enabled": { "type": "boolean", "default": true } } },
+        "docker": { "type": "object", "properties": { "enabled": { "type": "boolean" } } },
+        "ssh": { "type": "object", "properties": { "enabled": { "type": "boolean" } } }
       }
     }
   }

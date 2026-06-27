@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://jarvis-runtime.dev/specs/asset.schema.json",
-  "title": "Asset Protocol",
-  "description": "统一资源协议。角色、图片、音频、视频、字体、模板等一切产出与引用物均为 Asset。",
+  "title": "Asset Protocol v2",
+  "description": "统一资源协议。所有产出物均为 Asset。基于 hash 的一致性校验。",
   "type": "object",
-  "required": ["id", "type", "path"],
+  "required": ["id", "type", "path", "hash"],
   "properties": {
     "id": {
       "type": "string",
@@ -12,27 +12,29 @@
     },
     "type": {
       "type": "string",
-      "enum": ["character", "image", "audio", "video", "font", "template", "prompt", "style", "other"]
+      "enum": ["character", "image", "audio", "video", "font", "template", "other"]
     },
     "path": { "type": "string", "description": "相对于项目根目录的路径" },
+    "hash": {
+      "type": "string",
+      "description": "内容哈希（SHA256）。用于一致性校验和去重。",
+      "examples": ["sha256:abc123def456"]
+    },
     "name": { "type": "string" },
-    "description": { "type": "string" },
+    "version": { "type": "string", "description": "资产版本标识，如 MonkeyKing_v1" },
     "tags": { "type": "array", "items": { "type": "string" } },
-    "project": { "type": "string", "description": "所属项目 ID" },
-    "episode": { "type": "integer" },
+    "project": { "type": "string" },
     "mime_type": { "type": "string" },
     "size_bytes": { "type": "integer" },
     "width": { "type": "integer" },
     "height": { "type": "integer" },
     "duration_sec": { "type": "number" },
-    "checksum": { "type": "string" },
     "generated_by": { "type": "string", "description": "生成该 Asset 的 Worker" },
     "source_task_id": { "type": "string" },
     "variants": {
       "type": "array",
-      "items": { "type": "string", "description": "变体 asset ID 列表" }
+      "items": { "type": "string" }
     },
-    "created_at": { "type": "string", "format": "date-time" },
-    "updated_at": { "type": "string", "format": "date-time" }
+    "created_at": { "type": "string", "format": "date-time" }
   }
 }

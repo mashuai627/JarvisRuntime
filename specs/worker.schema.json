@@ -1,24 +1,31 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://jarvis-runtime.dev/specs/worker.schema.json",
-  "title": "Worker Protocol",
-  "description": "所有 Worker 的统一协议。Worker 禁止输出自然语言解释，只能输出结构化 JSON。",
+  "title": "Worker Protocol v2",
+  "description": "所有 Worker 的统一协议。Worker 禁止输出自然语言，只能输出结构化 JSON。",
   "type": "object",
-  "required": ["name", "version", "accepts", "returns"],
+  "required": ["name", "version", "capabilities", "returns"],
   "properties": {
     "name": {
       "type": "string",
-      "description": "Worker 名称，全项目唯一",
       "pattern": "^[A-Z][a-zA-Z]+Worker$"
     },
     "version": {
       "type": "string",
       "pattern": "^\\d+\\.\\d+\\.\\d+$"
     },
-    "accepts": {
+    "capabilities": {
       "type": "array",
       "items": { "type": "string" },
-      "description": "该 Worker 可处理的 task type 列表"
+      "description": "Worker 的能力标签。Scheduler 通过 capabilities 自动发现匹配的 Worker。",
+      "examples": [
+        ["script", "text_generation"],
+        ["storyboard", "image_prompt"],
+        ["image", "comfyui", "stable_diffusion"],
+        ["video", "ffmpeg", "compositing"],
+        ["audio", "tts", "voice_synthesis"],
+        ["review", "quality_check"]
+      ]
     },
     "returns": {
       "type": "string",
@@ -26,8 +33,11 @@
     },
     "model": {
       "type": "string",
-      "description": "调用的 AI 模型",
       "enum": ["deepseek-chat", "gpt-4o", "gpt-4o-mini", "claude-sonnet-4-20250514", "gemini-2.5-flash", "qwen-max", "local"]
+    },
+    "fallback_model": {
+      "type": "string",
+      "description": "主模型不可用时的降级模型"
     },
     "timeout_ms": {
       "type": "integer",
@@ -40,16 +50,16 @@
         "backoff_ms": { "type": "integer", "default": 1000 }
       }
     },
-    "dependencies": {
-      "type": "array",
-      "items": { "type": "string" },
-      "description": "依赖的其他 Worker 名称列表"
+    "output_schema_ref": {
+      "type": "string",
+      "description": "输出 JSON Schema 文件路径引用"
     },
-    "output_schema": {
+    "events": {
       "type": "object",
-      "description": "Worker 输出的 JSON Schema 引用",
+      "description": "Worker 发布/订阅的事件",
       "properties": {
-        "ref": { "type": "string" }
+        "publishes": { "type": "array", "items": { "type": "string" } },
+        "subscribes": { "type": "array", "items": { "type": "string" } }
       }
     }
   }

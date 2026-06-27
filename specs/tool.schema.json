@@ -1,18 +1,19 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://jarvis-runtime.dev/specs/tool.schema.json",
-  "title": "Tool Protocol",
-  "description": "工具调用协议。所有 MCP 工具、本地工具、外部 API 的统一调用格式。",
+  "title": "Tool Protocol v2",
+  "description": "抽象工具调用协议。不绑定任何具体实现（MCP/Docker/SSH/本地）。上层只看到 Tool，下层适配器负责转发。",
   "type": "object",
   "required": ["tool", "args"],
   "properties": {
     "tool": {
       "type": "string",
-      "description": "工具标识，格式 namespace.action",
-      "pattern": "^[a-z]+\\.[a-z_]+$",
+      "description": "抽象工具标识，格式 namespace.action。命名空间表示能力域，不暴露实现细节。",
       "examples": [
-        "filesystem.read",
-        "filesystem.write",
+        "fs.read",
+        "fs.write",
+        "fs.list",
+        "fs.delete",
         "shell.exec",
         "git.commit",
         "git.push",
@@ -20,13 +21,10 @@
         "http.get",
         "http.post",
         "browser.open",
-        "comfyui.generate"
+        "browser.screenshot"
       ]
     },
-    "args": {
-      "type": "object",
-      "description": "工具参数，由具体工具定义"
-    },
+    "args": { "type": "object", "description": "工具参数" },
     "timeout_ms": { "type": "integer", "default": 30000 },
     "retry": {
       "type": "object",
@@ -35,10 +33,10 @@
         "backoff_ms": { "type": "integer", "default": 1000 }
       }
     },
-    "capture": {
+    "backend": {
       "type": "string",
-      "enum": ["stdout", "stderr", "both", "none"],
-      "default": "stdout"
+      "description": "可选：指定后端适配器。不填则由 Runtime 自动选择。",
+      "enum": ["mcp", "local", "docker", "ssh", "http"]
     }
   },
   "definitions": {
@@ -48,11 +46,20 @@
       "properties": {
         "tool": { "type": "string" },
         "success": { "type": "boolean" },
-        "stdout": { "type": "string" },
-        "stderr": { "type": "string" },
-        "exit_code": { "type": "integer" },
+        "data": { "type": "object" },
+        "error": { "type": "object" },
         "duration_ms": { "type": "integer" },
-        "error": { "type": "object" }
+        "backend": { "type": "string", "description": "实际使用的后端适配器" }
+      }
+    },
+    "ToolAdapter": {
+      "type": "object",
+      "description": "后端适配器定义。新增执行环境只需实现此接口。",
+      "required": ["name", "exec"],
+      "properties": {
+        "name": { "type": "string", "enum": ["mcp", "local", "docker", "ssh", "http"] },
+        "exec": { "type": "string", "description": "适配器执行入口" },
+        "config": { "type": "object" }
       }
     }
   }
