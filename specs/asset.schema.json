@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jarvis-runtime.dev/specs/asset.schema.json",
+  "title": "Asset Protocol",
+  "description": "统一资源协议。角色、图片、音频、视频、字体、模板等一切产出与引用物均为 Asset。",
+  "type": "object",
+  "required": ["id", "type", "path"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^ASST-\\d{4}$"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["character", "image", "audio", "video", "font", "template", "prompt", "style", "other"]
+    },
+    "path": { "type": "string", "description": "相对于项目根目录的路径" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "project": { "type": "string", "description": "所属项目 ID" },
+    "episode": { "type": "integer" },
+    "mime_type": { "type": "string" },
+    "size_bytes": { "type": "integer" },
+    "width": { "type": "integer" },
+    "height": { "type": "integer" },
+    "duration_sec": { "type": "number" },
+    "checksum": { "type": "string" },
+    "generated_by": { "type": "string", "description": "生成该 Asset 的 Worker" },
+    "source_task_id": { "type": "string" },
+    "variants": {
+      "type": "array",
+      "items": { "type": "string", "description": "变体 asset ID 列表" }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

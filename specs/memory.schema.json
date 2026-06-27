@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jarvis-runtime.dev/specs/memory.schema.json",
+  "title": "Memory Protocol",
+  "description": "记忆协议。角色设定、世界观、风格、项目上下文等持久化记忆，全部 JSON。",
+  "type": "object",
+  "required": ["id", "type", "data"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^MEM-\\d{4}$"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["character", "world", "style", "project", "prompt_template", "rule", "user_preference", "custom"]
+    },
+    "data": {
+      "type": "object",
+      "description": "记忆数据，结构由 type 决定"
+    },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "project": { "type": "string" },
+    "priority": { "type": "integer", "default": 0, "minimum": 0, "maximum": 10 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  },
+  "examples": {
+    "character": {
+      "id": "MEM-0001",
+      "type": "character",
+      "data": {
+        "name": "孙悟空",
+        "aliases": ["齐天大圣", "美猴王"],
+        "personality": "勇敢、机智、叛逆",
+        "appearance": "毛脸雷公嘴，身穿金甲，头戴金冠",
+        "abilities": ["七十二变", "筋斗云", "火眼金睛"],
+        "voice_tone": "洪亮、自信",
+        "relationships": {}
+      }
+    },
+    "style": {
+      "id": "MEM-0002",
+      "type": "style",
+      "data": {
+        "name": "国风水墨",
+        "color_palette": ["#2C1810", "#8B4513", "#DAA520"],
+        "line_style": "ink_brush",
+        "reference_images": [],
+        "prompt_prefix": "Chinese ink wash painting style, traditional art"
+      }
+    }
+  }
+}

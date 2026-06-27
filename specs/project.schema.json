@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jarvis-runtime.dev/specs/project.schema.json",
+  "title": "Project Protocol",
+  "description": "项目定义协议。一个 Project 包含多个 Episode，每个 Episode 是一组 Task 的集合。",
+  "type": "object",
+  "required": ["id", "name", "type"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^PROJ-\\d{4}$"
+    },
+    "name": { "type": "string" },
+    "title": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": ["comic", "video", "novel", "game", "app", "data", "custom"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["planning", "in_progress", "paused", "completed", "archived"]
+    },
+    "language": { "type": "string", "default": "zh" },
+    "style": { "type": "string", "description": "视觉/叙事风格标识" },
+    "episodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "episode": { "type": "integer", "minimum": 1 },
+          "title": { "type": "string" },
+          "status": { "type": "string" },
+          "task_ids": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "characters": {
+      "type": "array",
+      "items": { "type": "string", "description": "角色 asset ID" }
+    },
+    "assets": {
+      "type": "array",
+      "items": { "type": "string", "description": "资源 asset ID" }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

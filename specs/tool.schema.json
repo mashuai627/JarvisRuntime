@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jarvis-runtime.dev/specs/tool.schema.json",
+  "title": "Tool Protocol",
+  "description": "工具调用协议。所有 MCP 工具、本地工具、外部 API 的统一调用格式。",
+  "type": "object",
+  "required": ["tool", "args"],
+  "properties": {
+    "tool": {
+      "type": "string",
+      "description": "工具标识，格式 namespace.action",
+      "pattern": "^[a-z]+\\.[a-z_]+$",
+      "examples": [
+        "filesystem.read",
+        "filesystem.write",
+        "shell.exec",
+        "git.commit",
+        "git.push",
+        "python.run",
+        "http.get",
+        "http.post",
+        "browser.open",
+        "comfyui.generate"
+      ]
+    },
+    "args": {
+      "type": "object",
+      "description": "工具参数，由具体工具定义"
+    },
+    "timeout_ms": { "type": "integer", "default": 30000 },
+    "retry": {
+      "type": "object",
+      "properties": {
+        "max": { "type": "integer", "default": 1 },
+        "backoff_ms": { "type": "integer", "default": 1000 }
+      }
+    },
+    "capture": {
+      "type": "string",
+      "enum": ["stdout", "stderr", "both", "none"],
+      "default": "stdout"
+    }
+  },
+  "definitions": {
+    "ToolResult": {
+      "type": "object",
+      "required": ["tool", "success"],
+      "properties": {
+        "tool": { "type": "string" },
+        "success": { "type": "boolean" },
+        "stdout": { "type": "string" },
+        "stderr": { "type": "string" },
+        "exit_code": { "type": "integer" },
+        "duration_ms": { "type": "integer" },
+        "error": { "type": "object" }
+      }
+    }
+  }
+}

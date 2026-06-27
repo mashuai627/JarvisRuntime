@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jarvis-runtime.dev/specs/storyboard.schema.json",
+  "title": "Storyboard Protocol",
+  "description": "分镜协议。将 Script 的每个 Scene 拆解为可生成画面的 Panel 序列。",
+  "type": "object",
+  "required": ["project", "episode", "script_ref", "panels"],
+  "properties": {
+    "project": { "type": "string" },
+    "episode": { "type": "integer" },
+    "script_ref": { "type": "string", "description": "对应 script.json 路径" },
+    "style": { "type": "string", "description": "画风标识" },
+    "aspect_ratio": { "type": "string", "default": "16:9" },
+    "panels": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["panel_id", "scene_id", "prompt"],
+        "properties": {
+          "panel_id": { "type": "integer", "minimum": 1 },
+          "scene_id": { "type": "integer" },
+          "type": {
+            "type": "string",
+            "enum": ["wide", "close_up", "medium", "establishing", "action", "reaction", "transition"]
+          },
+          "prompt": { "type": "string", "description": "Stable Diffusion / ComfyUI prompt" },
+          "negative_prompt": { "type": "string" },
+          "characters": { "type": "array", "items": { "type": "string" } },
+          "dialogue_overlay": { "type": "string", "description": "画面上要叠加的对话文字" },
+          "narration_overlay": { "type": "string" },
+          "duration_sec": { "type": "integer", "default": 5 },
+          "transition": {
+            "type": "string",
+            "enum": ["cut", "fade", "dissolve", "wipe", "none"],
+            "default": "cut"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "panel_count": { "type": "integer" },
+        "total_duration_sec": { "type": "integer" },
+        "generated_by": { "type": "string" }
+      }
+    }
+  }
+}

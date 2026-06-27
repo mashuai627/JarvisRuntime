@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jarvis-runtime.dev/specs/task.schema.json",
+  "title": "Task Protocol",
+  "description": "Jarvis Runtime 唯一任务协议。整个系统不以 Prompt 驱动，以 Task 驱动。所有 Worker 必须接受并返回 Task。",
+  "type": "object",
+  "required": ["id", "type", "status"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "全局唯一任务 ID，格式 TASK-xxxx",
+      "pattern": "^TASK-\\d{4}$"
+    },
+    "type": {
+      "type": "string",
+      "description": "任务类型，必须匹配 Worker 的 accepts 列表",
+      "enum": [
+        "generate_script",
+        "generate_storyboard",
+        "generate_image",
+        "generate_video",
+        "generate_audio",
+        "review",
+        "publish",
+        "edit",
+        "translate",
+        "analyze",
+        "fetch",
+        "export",
+        "custom"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "queued", "running", "finished", "failed", "review_pending", "rejected"],
+      "description": "任务状态流转: pending → queued → running → finished/rejected → review_pending → finished"
+    },
+    "input": {
+      "type": "object",
+      "description": "任务输入参数，结构由 task type 决定",
+      "properties": {
+        "project": { "type": "string", "description": "项目名称" },
+        "episode": { "type": "integer", "minimum": 1 },
+        "language": { "type": "string", "default": "zh" },
+        "style": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "output": {
+      "type": "object",
+      "description": "任务输出，status=finished 时必填",
+      "properties": {
+        "path": { "type": "string" },
+        "format": { "type": "string" },
+        "size": { "type": "integer" },
+        "checksum": { "type": "string" }
+      }
+    },
+    "error": {
+      "type": "object",
+      "description": "错误信息，status=failed 时必填",
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "worker": { "type": "string" }
+      }
+    },
+    "worker": {
+      "type": "string",
+      "description": "执行该任务的 Worker 名称"
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "started_at": { "type": "string", "format": "date-time" },
+    "finished_at": { "type": "string", "format": "date-time" },
+    "parent_task_id": { "type": "string", "description": "父任务 ID，用于任务链" },
+    "children": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "子任务 ID 列表"
+    },
+    "retry_count": { "type": "integer", "default": 0, "maximum": 3 },
+    "priority": { "type": "integer", "default": 0, "minimum": 0, "maximum": 10 }
+  }
+}
