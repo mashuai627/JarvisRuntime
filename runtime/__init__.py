@@ -1,33 +1,40 @@
 """
-Jarvis Runtime — 事件驱动的 Agent 执行引擎。
+Jarvis Runtime — Event-Driven AI Agent Operating Kernel (v3).
 
-Core Components:
-  EventBus  — 事件总线，所有组件通过发布/订阅解耦
-  TaskQueue — 任务持久化存储，支持 DAG 依赖
-  Registry  — Worker 注册与自动发现
-  Scheduler — 任务调度，按 capabilities 匹配 Worker
-
-Architecture:
-  Skill (Task Graph / Workflow)
-    └─ Task (唯一驱动单元)
-        └─ EventBus (发布/订阅)
-            ├─ Scheduler (调度)
-            ├─ Registry (发现 Worker)
-            └─ Queue (存储)
+Core Components (6):
+  EventBus      — 事件总线 (pub/sub)
+  EventStore    — 事件溯源存储 (append-only)
+  Queue         — 任务快照队列 (snapshot-based)
+  Scheduler     — 调度器 (when to run)
+  Dispatcher    — 分发器 (where to run)
+  Executor      — 执行器 (timeout/retry/lease/cancel)
+  Registry      — 注册中心 (capability-based)
+  HealthMonitor — 健康监控
+  Metrics       — 可观测性指标
+  Command       — 用户层抽象 (Skill → Command → Runtime → Tasks)
 """
 
 from .event_bus import EventBus, Event, EventPriority
-from .queue import TaskQueue, Task
-from .registry import Registry, WorkerInfo
+from .event_store import EventStore, StoredEvent
+from .queue import TaskQueue, TaskSnapshot, Priority
 from .scheduler import Scheduler
+from .dispatcher import Dispatcher, WorkerEndpoint, Backend
+from .executor import Executor, ExecutionResult, ExecutionState, Lease
+from .registry import Registry, WorkerInfo, CapabilityInfo
+from .health_monitor import HealthMonitor, HealthStatus, ComponentHealth
+from .metrics import Metrics
+from .command import Command, TaskGraph
 
 __all__ = [
-    "EventBus",
-    "Event",
-    "EventPriority",
-    "TaskQueue",
-    "Task",
-    "Registry",
-    "WorkerInfo",
+    # Core
+    "EventBus", "Event", "EventPriority",
+    "EventStore", "StoredEvent",
+    "TaskQueue", "TaskSnapshot", "Priority",
     "Scheduler",
+    "Dispatcher", "WorkerEndpoint", "Backend",
+    "Executor", "ExecutionResult", "ExecutionState", "Lease",
+    "Registry", "WorkerInfo", "CapabilityInfo",
+    "HealthMonitor", "HealthStatus", "ComponentHealth",
+    "Metrics",
+    "Command", "TaskGraph",
 ]
